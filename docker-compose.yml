@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: fuerza
+      POSTGRES_PASSWORD: fuerza
+      POSTGRES_DB: fuerza
+    ports:
+      - "5432:5432"
+    volumes:
+      - fuerza_pgdata:/var/lib/postgresql/data
+volumes:
+  fuerza_pgdata:
+
+

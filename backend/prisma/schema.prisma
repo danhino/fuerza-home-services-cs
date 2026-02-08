@@ -1,0 +1,259 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  customer
+  technician
+  both
+  admin
+}
+
+enum Trade {
+  plumber
+  electrician
+  hvac
+  cleaning
+  pool
+}
+
+enum TechnicianVerificationStatus {
+  unverified
+  pending
+  verified
+  rejected
+}
+
+enum JobStatus {
+  Draft
+  Requested
+  Matched
+  EnRoute
+  Arrived
+  Diagnosing
+  Working
+  AwaitingEstimateApproval
+  Completed
+  Cancelled
+}
+
+enum EstimateChangeStatus {
+  Pending
+  Approved
+  Declined
+}
+
+enum PaymentStatus {
+  RequiresPaymentMethod
+  RequiresConfirmation
+  Processing
+  Succeeded
+  Failed
+  Refunded
+}
+
+enum PaymentMethodType {
+  ApplePay
+  Card
+}
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role   UserRole
+  name   String
+  phone  String?  @unique
+  email  String?  @unique
+  photo  String?
+  rating Float    @default(5.0)
+
+  isDeactivated Boolean @default(false)
+
+  technicianProfile TechnicianProfile?
+  customerProfile   CustomerProfile?
+
+  devices Device[]
+
+  jobsAsCustomer   Job[] @relation("jobs_customer")
+  jobsAsTechnician Job[] @relation("jobs_technician")
+
+  chatMessages ChatMessage[]
+
+  estimateChangeRequestsProposed EstimateChangeRequest[] @relation("estimate_changes_proposed")
+}
+
+model Device {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  platform String // ios
+  token    String  @unique
+  sandbox  Boolean @default(true)
+}
+
+model TechnicianProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  trades       Trade[]
+  onlineStatus Boolean @default(false)
+
+  currentLat Float?
+  currentLng Float?
+
+  serviceRadiusKm    Float                        @default(15)
+  verificationStatus TechnicianVerificationStatus @default(unverified)
+  completedJobs      Int                          @default(0)
+
+  availabilityHoursJson String? // MVP: JSON encoded schedule
+  licenseDocUrl         String?
+  insuranceDocUrl       String?
+}
+
+model CustomerProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  savedAddresses SavedAddress[]
+  paymentMethods PaymentMethod[]
+}
+
+model SavedAddress {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerUserId String
+  customer       CustomerProfile @relation(fields: [customerUserId], references: [userId], onDelete: Cascade)
+
+  label   String?
+  address String
+  lat     Float
+  lng     Float
+}
+
+model PaymentMethod {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerUserId String
+  customer       CustomerProfile @relation(fields: [customerUserId], references: [userId], onDelete: Cascade)
+
+  type                    PaymentMethodType
+  provider                String // stripe
+  providerPaymentMethodId String
+
+  last4 String?
+  brand String?
+}
+
+model Job {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerId String
+  customer   User   @relation("jobs_customer", fields: [customerId], references: [id], onDelete: Restrict)
+
+  technicianId String?
+  technician   User?   @relation("jobs_technician", fields: [technicianId], references: [id], onDelete: SetNull)
+
+  trade       Trade
+  description String
+  photos      String[] @default([])
+
+  address String
+  lat     Float
+  lng     Float
+
+  scheduledAt DateTime?
+  isAsap      Boolean   @default(true)
+
+  status JobStatus @default(Draft)
+
+  estimate               Estimate?
+  estimateChangeRequests EstimateChangeRequest[]
+  chat                   ChatMessage[]
+  payment                Payment?
+}
+
+model Estimate {
+  jobId String @id
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  originalAmountCents Int
+  currentAmountCents  Int
+  currency            String
+}
+
+model EstimateChangeRequest {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  proposedByUserId String
+  proposedBy       User   @relation("estimate_changes_proposed", fields: [proposedByUserId], references: [id], onDelete: Restrict)
+
+  oldAmountCents Int
+  newAmountCents Int
+  reason         String
+  status         EstimateChangeStatus @default(Pending)
+
+  decidedAt DateTime?
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id], onDelete: Restrict)
+
+  message String
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  jobId String @unique
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  amountCents Int
+  currency    String
+  status      PaymentStatus
+  method      PaymentMethodType
+  receiptUrl  String?
+
+  stripePaymentIntentId String?
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  channel    String // phone/email
+  target     String // +1... or email
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+}

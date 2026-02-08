@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Env (we use backend/env.example, but still ignore real env files)
+.env
+.env.*
+!.env.example
+backend/.env
+
+# Logs / build output
+*.log
+dist/
+coverage/
+.turbo/
+.next/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# iOS / Xcode
+DerivedData/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+*.xcworkspace/
+Pods/
+.swiftpm/
+build/
+
+# If you generate Xcode projects with XcodeGen, ignore the generated project:
+ios/*.xcodeproj/
+
+# If you decide to COMMIT the Xcode project instead, delete the line above and use:
+# ios/*.xcodeproj/xcuserdata/
+# ios/*.xcodeproj/project.xcworkspace/
+
+# Prisma
+# Commit migrations (do NOT ignore prisma/migrations)

@@ -1,0 +1,18 @@
+{
+  "name": "fuerza-home-services",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "backend",
+    "admin"
+  ],
+  "scripts": {
+    "dev": "npm run -ws dev",
+    "build": "npm run -ws build",
+    "lint": "npm run -ws lint"
+  }
+}
+
+

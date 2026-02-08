@@ -1,0 +1,38 @@
+name: FuerzaHomeServices
+options:
+  bundleIdPrefix: com.fuerza
+  deploymentTarget:
+    iOS: "17.0"
+settings:
+  base:
+    DEVELOPMENT_TEAM: ""
+targets:
+  FuerzaHomeServices:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fuerza.homeservices
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 0.1.0
+        INFOPLIST_FILE: Sources/Info.plist
+        SWIFT_VERSION: 5.0
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleDisplayName: Fuerza Home Services
+        UILaunchScreen: {}
+        NSLocationWhenInUseUsageDescription: "We use your location to show nearby technicians and to route to jobs."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Technicians share location only while online or during active jobs."
+        UIBackgroundModes:
+          - location
+          - remote-notification
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+    scheme:
+      testTargets: []
+      gatherCoverageData: false
+
+
