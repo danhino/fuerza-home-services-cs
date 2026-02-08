@@ -13,6 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Select newest Xcode on runner
+        shell: bash
+        run: |
+          echo "Available Xcodes:"
+          ls -1 /Applications | grep -E '^Xcode.*\.app$' || true
+          XCODE_APP="$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)"
+          echo "Selecting: $XCODE_APP"
+          sudo xcode-select -s "$XCODE_APP/Contents/Developer"
+          xcodebuild -version
+
       - name: Install XcodeGen
         run: brew install xcodegen
 
