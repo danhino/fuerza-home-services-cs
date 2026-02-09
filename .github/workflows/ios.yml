@@ -38,19 +38,33 @@ jobs:
           echo "Available simulators:"
           xcrun simctl list devices available || true
 
-          # Prefer iPhone 15 if it's installed; otherwise pick the first available iPhone.
-          if xcrun simctl list devices available | grep -q "iPhone 15"; then
-            DEVICE_NAME="iPhone 15"
-          else
-            DEVICE_NAME="$(xcrun simctl list devices available | grep -m 1 -E 'iPhone[^()]*(\([^)]*\))?' | sed -E 's/^[[:space:]]*([^()]*(\([^)]*\))?).*$/\1/' | head -n 1)"
-          fi
+          # Robust selection via JSON: prefer iPhone 15 (any OS), else first iPhone.
+          DEVICE_ID="$(xcrun simctl list -j devices available | /usr/bin/python3 - <<'PY'
+import json, sys
+data = json.load(sys.stdin)
+devices = []
+for runtime, sims in data.get("devices", {}).items():
+    for s in sims:
+        if s.get("isAvailable") and s.get("name", "").startswith("iPhone"):
+            devices.append((s.get("name"), s.get("udid")))
+def pick(name_contains):
+    for name, udid in devices:
+        if name_contains in name:
+            return udid
+    return None
+udid = pick("iPhone 15")
+if not udid and devices:
+    udid = devices[0][1]
+print(udid or "")
+PY
+)"
 
-          if [ -z "${DEVICE_NAME}" ]; then
+          if [ -z "${DEVICE_ID}" ]; then
             echo "ERROR: Could not find any available iPhone simulator on this runner."
             exit 1
           fi
 
-          DESTINATION="platform=iOS Simulator,OS=latest,name=${DEVICE_NAME}"
+          DESTINATION="platform=iOS Simulator,id=${DEVICE_ID}"
           echo "Using destination: ${DESTINATION}"
 
           xcodebuild \
