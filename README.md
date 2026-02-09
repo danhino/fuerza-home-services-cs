@@ -73,4 +73,7 @@ The SwiftUI iOS app lives in `ios/` (generated project + sources).
 ### TestFlight (Codemagic)
 See `docs/codemagic-testflight.md` for Codemagic + TestFlight setup.
 
+## Supabase backend
+If you want Supabase as your backend, see `docs/supabase.md`.
+
 

@@ -14,4 +14,8 @@
 ## Run
 See root `README.md`.
 
+## Supabase
+This backend can run on Supabase Postgres by setting `DATABASE_URL` to your Supabase connection string.
+Optional: add Supabase Storage for job photos and use service role keys for secure uploads.
+
 
