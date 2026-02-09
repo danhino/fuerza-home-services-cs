@@ -68,6 +68,9 @@ Admin login uses OTP (dev codes print in the backend logs).
 - Technician (electrician): `electric@fuerza.local`
 
 ## iOS app
-The SwiftUI iOS app will live in `ios/` (generated project + sources). Next step is wiring MapKit customer map + technician request flow to these APIs.
+The SwiftUI iOS app lives in `ios/` (generated project + sources).
+
+### TestFlight (Codemagic)
+See `docs/codemagic-testflight.md` for Codemagic + TestFlight setup.
 
 
