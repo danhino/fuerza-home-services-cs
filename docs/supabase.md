@@ -27,8 +27,14 @@ In Phase 2, the backend can issue signed upload URLs so the iOS app can upload p
 
 ## 5) Optional: Supabase Auth
 If you want to switch from OTP auth in this API to Supabase Auth:
-- Use Supabase client SDK in the iOS app
-- Replace `/auth/start` + `/auth/verify` with Supabase sessions
-- Add middleware in backend to validate Supabase JWTs
+- Use Supabase Auth in the iOS app and admin UI
+- Backend validates Supabase JWTs on every request
+- Set user role in Supabase `user_metadata` or `app_metadata`
+
+### Admin role
+Create an admin user in Supabase and set:
+```
+app_metadata.role = "admin"
+```
 
 

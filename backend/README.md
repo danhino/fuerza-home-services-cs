@@ -1,7 +1,7 @@
 # Backend (Fastify + Prisma)
 
 ## What’s included (MVP)
-- OTP auth (dev-only delivery, real SMS/email provider in Phase 2)
+- Supabase Auth (JWT verification)
 - RBAC: customer vs technician vs admin
 - Nearby technicians query (trade + radius)
 - Job request -> accept -> lifecycle statuses

@@ -1,8 +1,7 @@
 import type { Server as HttpServer } from "node:http";
 import { Server } from "socket.io";
 import { prisma } from "./prisma.js";
-import { jwtVerify } from "jose";
-import { getEnv } from "./env.js";
+import { verifySupabaseToken } from "./supabaseAuth.js";
 
 export type RealtimeEvent =
   | { type: "job:request"; jobId: string; customerId: string; trade: string; lat: number; lng: number }
@@ -21,10 +20,8 @@ export function createIo(server: HttpServer) {
     try {
       const token = socket.handshake.auth?.token as string | undefined;
       if (!token) return next(new Error("missing token"));
-      const env = getEnv();
-      const secret = new TextEncoder().encode(env.JWT_SECRET);
-      const { payload } = await jwtVerify(token, secret);
-      const userId = (payload.userId as string | undefined) ?? (payload.sub as string | undefined);
+      const payload = await verifySupabaseToken(token);
+      const userId = payload.sub as string | undefined;
       if (!userId) return next(new Error("invalid token"));
       socket.data.userId = userId;
       next();

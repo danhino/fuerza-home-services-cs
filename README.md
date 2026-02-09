@@ -59,7 +59,7 @@ npm run -w admin dev
 
 Open `http://localhost:3002`.
 
-Admin login uses OTP (dev codes print in the backend logs).
+Admin login uses Supabase Auth (email/password). Configure `admin/env.example`.
 
 ## Test accounts (seed)
 - Admin: `admin@fuerza.local`
